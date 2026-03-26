@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpaca — Little Wins Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0f0f0f;
+    --white: #ffffff;
+    --off-white: #f9f7f4;
+    --teal: #2bb5a0;
+    --teal-light: #e8f7f5;
+    --teal-dark: #1e9080;
+    --gray-100: #f4f4f2;
+    --gray-200: #e8e8e5;
+    --gray-300: #d0d0cc;
+    --gray-400: #a8a8a4;
+    --gray-500: #6e6e6a;
+    --gray-700: #3a3a38;
+    --navy: #1a2332;
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--black); font-size: 15px; line-height: 1.6; }
+
+  /* NAV */
+  nav {
+    background: var(--white); border-bottom: 1px solid var(--gray-200);
+    padding: 0 40px; height: 58px;
+    display: flex; align-items: center; gap: 32px;
+  }
+  .nav-brand { display: flex; align-items: baseline; gap: 10px; text-decoration: none; color: var(--black); flex-shrink: 0; }
+  .nav-brand .logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .nav-brand .sub { font-size: 12px; color: var(--gray-500); font-style: italic; }
+  .nav-links { display: flex; }
+  .nav-link { padding: 0 16px; height: 58px; display: flex; align-items: center; font-size: 14px; font-weight: 500; color: var(--gray-500); text-decoration: none; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .nav-link:hover { color: var(--black); border-color: var(--black); }
+  .nav-search { flex: 1; max-width: 400px; display: flex; align-items: center; background: var(--gray-100); border-radius: 24px; padding: 0 16px; gap: 8px; }
+  .nav-search input { border: none; background: transparent; outline: none; font-size: 14px; color: var(--black); width: 100%; padding: 8px 0; font-family: inherit; }
+  .nav-search input::placeholder { color: var(--gray-400); }
+  .nav-actions { display: flex; gap: 10px; margin-left: auto; align-items: center; }
+  .btn { padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; }
+  .btn-ghost { background: transparent; color: var(--gray-700); }
+  .btn-primary { background: var(--black); color: var(--white); }
+  .btn-teal { background: var(--teal); color: var(--white); }
+  .tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tag-featured { background: var(--black); color: var(--white); }
+  .tag-culture { background: var(--teal-light); color: var(--teal-dark); }
+
+  /* HERO */
+  .landing-hero { background: var(--off-white); padding: 80px 40px 60px; text-align: center; }
+  .landing-hero h1 { font-family: 'Playfair Display', serif; font-size: 56px; font-weight: 700; line-height: 1.12; color: var(--black); max-width: 640px; margin: 0 auto 20px; }
+  .landing-hero p { font-size: 17px; color: var(--gray-500); max-width: 480px; margin: 0 auto 32px; line-height: 1.65; }
+  .hero-featured { max-width: 900px; margin: 40px auto 0; background: var(--white); border-radius: var(--radius-lg); border: 1px solid var(--gray-200); display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+  .hero-img { background: var(--gray-200); min-height: 280px; display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 13px; }
+  .hero-content { padding: 36px; text-align: left; display: flex; flex-direction: column; justify-content: center; }
+  .tag-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .hero-content h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 12px; font-weight: 600; }
+  .hero-content p { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; line-height: 1.65; }
+  .hero-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--gray-400); margin-bottom: 20px; }
+  .stars { color: #f59e0b; }
+
+  /* POPULAR */
+  .section { padding: 60px 40px; max-width: 1100px; margin: 0 auto; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
+  .section-sub { font-size: 13px; color: var(--gray-400); margin-bottom: 24px; }
+  .see-all { font-size: 13px; color: var(--teal); text-decoration: none; font-weight: 500; }
+  .cards-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .card { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); overflow: hidden; }
+  .card-img { background: var(--gray-200); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 12px; }
+  .card-body { padding: 16px; }
+  .card-tag { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); margin-bottom: 6px; }
+  .card-title { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 10px; color: var(--black); }
+  .card-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--gray-400); }
+
+  /* TESTIMONIALS */
+  .testimonials { background: var(--off-white); padding: 60px 40px; }
+  .testimonials-inner { max-width: 1100px; margin: 0 auto; }
+  .testimonials h2 { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 700; text-align: center; margin-bottom: 40px; }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .testimonial-card { background: var(--white); border-radius: var(--radius-lg); padding: 28px; border: 1px solid var(--gray-200); }
+  .testimonial-card p { font-size: 14px; color: var(--gray-700); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+  .testimonial-author { font-size: 13px; font-weight: 600; color: var(--black); }
+  .testimonial-school { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  /* WHY LWL */
+  .why-lwl { padding: 60px 40px; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .why-lwl h2 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; margin-bottom: 16px; }
+  .why-lwl p { font-size: 15px; color: var(--gray-500); line-height: 1.75; }
+  .why-img { background: var(--gray-200); border-radius: var(--radius-lg); aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 13px; }
+
+  /* TOPICS */
+  .topics { padding: 0 40px 60px; max-width: 1100px; margin: 0 auto; }
+  .topics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .topic-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); }
+  .topic-icon { width: 36px; height: 36px; background: var(--gray-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .topic-name { font-size: 14px; font-weight: 500; }
+  .topic-desc { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  footer { background: var(--black); color: rgba(255,255,255,0.4); padding: 40px; text-align: center; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="#">
+    <span class="logo">alpaca</span>
+    <span class="sub">little wins Library</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#">What to Use</a>
+    <a class="nav-link" href="#">Resources</a>
+    <a class="nav-link" href="#">Situations</a>
+    <a class="nav-link" href="#">Collections</a>
+    <a class="nav-link" href="#">About</a>
+  </div>
+  <div class="nav-search">
+    <svg width="14" height="14" fill="none" stroke="#a8a8a4" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" placeholder="Search Resources">
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost">Log In</button>
+    <button class="btn btn-primary">Create free account</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="landing-hero">
+  <h1>Free top-notch resources to strengthen school culture.</h1>
+  <p>Manage your staff with confidence and build a more aligned team with our collection of resources built specifically for school leaders.</p>
+  <button class="btn btn-primary" style="padding:14px 32px;font-size:16px;">View all Resources</button>
+  <div class="hero-featured">
+    <div class="hero-img">[ Featured Image ]</div>
+    <div class="hero-content">
+      <div class="tag-row">
+        <span class="tag tag-featured">Featured</span>
+        <span class="tag tag-culture">Culture Tip</span>
+      </div>
+      <h2>Spring Reset: Re-energizing Your Team After Break</h2>
+      <p>Returning from spring break can feel like a mini "back-to-school" moment. This week's edition includes a culture-building activity to reconnect your staff.</p>
+      <div class="hero-meta">
+        <span>⏱ 3 min read</span>
+        <span><span class="stars">★★★★★</span> 4.9 (151)</span>
+      </div>
+      <button class="btn btn-primary">Read This Week's Star Resource</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOST POPULAR -->
+<div class="section">
+  <div class="section-header">
+    <h2 class="section-title">Most Popular This Month</h2>
+    <a class="see-all" href="#">See all →</a>
+  </div>
+  <p class="section-sub">Top-rated resources from principals like you</p>
+  <div class="cards-row">
+    <div class="card">
+      <div class="card-img">[ Image ]</div>
+      <div class="card-body">
+        <div class="card-tag">Culture Tip</div>
+        <div class="card-title">Staff Appreciation on a Budget</div>
+        <div class="card-meta"><span>⏱ 6 min</span><span><span class="stars">★</span> 4.9</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-img">[ Image ]</div>
+      <div class="card-body">
+        <div class="card-tag">Icebreaker</div>
+        <div class="card-title">Two Truths and a Lie: School Edition</div>
+        <div class="card-meta"><span>⏱ 3 min</span><span><span class="stars">★</span> 4.8</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-img">[ Image ]</div>
+      <div class="card-body">
+        <div class="card-tag">Management</div>
+        <div class="card-title">The 5-Minute Check-In Protocol</div>
+        <div class="card-meta"><span>⏱ 6 min</span><span><span class="stars">★</span> 4.4</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-img">[ Image ]</div>
+      <div class="card-body">
+        <div class="card-tag">Culture Tip</div>
+        <div class="card-title">End-of-Year Gratitude Circle</div>
+        <div class="card-meta"><span>⏱ 5 min</span><span><span class="stars">★</span> 4.7</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials">
+  <div class="testimonials-inner">
+    <h2>Trusted by school leaders<br>all over the country.</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <p>"I am just so appreciative of the newsletter we've gotten so many ideas from it."</p>
+        <div class="testimonial-author">Ann Weaver</div>
+        <div class="testimonial-school">Sacred Heart School, Pennsylvania</div>
+      </div>
+      <div class="testimonial-card">
+        <p>"The ideas and activities are amazing and have had a huge impact on our school culture!"</p>
+        <div class="testimonial-author">Shelby Piersch</div>
+        <div class="testimonial-school">West Delaware Community School District, Manchester, IA</div>
+      </div>
+      <div class="testimonial-card">
+        <p>"I think your resources are AMAZING. I love that each one is totally complete — everything you need is right there!"</p>
+        <div class="testimonial-author">Ann Weaver</div>
+        <div class="testimonial-school">Sacred Heart School, Pennsylvania</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY LWL -->
+<div class="why-lwl">
+  <div>
+    <h2>Why the LWL?</h2>
+    <p>The Little Wins Library gives you quick, practical activities to reset your mood, boost focus, and feel more in control, anytime, anywhere. Perfect for those high-stress moments, transitions, or just when you need a little lift. Start small, see the difference.</p>
+  </div>
+  <div class="why-img">[ Illustration ]</div>
+</div>
+
+<!-- TOPICS -->
+<div class="topics">
+  <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Browse by Topic</h3>
+  <div class="topics-grid">
+    <div class="topic-item">
+      <div class="topic-icon">👏</div>
+      <div><div class="topic-name">Staff Morale & Appreciation</div><div class="topic-desc">Help staff feel seen and valued</div></div>
+    </div>
+    <div class="topic-item">
+      <div class="topic-icon">💬</div>
+      <div><div class="topic-name">Team Building & Communication</div><div class="topic-desc">Build stronger relationships on your team</div></div>
+    </div>
+    <div class="topic-item">
+      <div class="topic-icon">📅</div>
+      <div><div class="topic-name">Meeting Icebreakers & Energizers</div><div class="topic-desc">Quick activities to start meetings right</div></div>
+    </div>
+    <div class="topic-item">
+      <div class="topic-icon">⏰</div>
+      <div><div class="topic-name">Time Management & Systems</div><div class="topic-desc">Resources for more productive workdays</div></div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 Alpaca Education. All rights reserved.</footer>
+
+</body>
+</html>
