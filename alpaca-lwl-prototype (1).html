@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpaca — Little Wins Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0f0f0f;
+    --white: #ffffff;
+    --off-white: #f9f7f4;
+    --teal: #2bb5a0;
+    --teal-light: #e8f7f5;
+    --teal-dark: #1e9080;
+    --gray-100: #f4f4f2;
+    --gray-200: #e8e8e5;
+    --gray-300: #d0d0cc;
+    --gray-400: #a8a8a4;
+    --gray-500: #6e6e6a;
+    --gray-700: #3a3a38;
+    --navy: #1a2332;
+    --radius: 8px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--black);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* SCREEN SYSTEM */
+  .screen { display: none; min-height: 100vh; background: var(--white); }
+  .screen.active { display: block; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 40px;
+    height: 58px;
+    display: flex; align-items: center; gap: 32px;
+  }
+  .nav-brand {
+    display: flex; align-items: baseline; gap: 10px;
+    text-decoration: none; color: var(--black);
+    flex-shrink: 0;
+  }
+  .nav-brand .logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+  .nav-brand .sub { font-size: 12px; color: var(--gray-500); font-style: italic; }
+  .nav-links { display: flex; gap: 0; }
+  .nav-link {
+    padding: 0 16px; height: 58px; display: flex; align-items: center;
+    font-size: 14px; font-weight: 500; color: var(--gray-500);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s; text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-link:hover, .nav-link.active { color: var(--black); border-color: var(--black); }
+  .nav-search {
+    flex: 1; max-width: 400px;
+    display: flex; align-items: center;
+    background: var(--gray-100); border-radius: 24px; padding: 0 16px; gap: 8px;
+    cursor: text;
+  }
+  .nav-search input {
+    border: none; background: transparent; outline: none;
+    font-size: 14px; color: var(--black); width: 100%; padding: 8px 0;
+    font-family: inherit;
+  }
+  .nav-search input::placeholder { color: var(--gray-400); }
+  .nav-search svg { color: var(--gray-400); flex-shrink: 0; }
+  .nav-actions { display: flex; gap: 10px; margin-left: auto; align-items: center; }
+  .btn {
+    padding: 9px 20px; border-radius: 6px; font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.2s; font-family: inherit;
+  }
+  .btn-ghost { background: transparent; color: var(--gray-700); }
+  .btn-ghost:hover { background: var(--gray-100); }
+  .btn-primary { background: var(--black); color: var(--white); }
+  .btn-primary:hover { background: var(--navy); }
+  .btn-teal { background: var(--teal); color: var(--white); }
+  .btn-teal:hover { background: var(--teal-dark); }
+  .btn-outline { background: transparent; border: 1.5px solid var(--gray-300); color: var(--gray-700); }
+  .btn-outline:hover { border-color: var(--black); color: var(--black); }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--navy); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ============ SCREEN 1: LANDING (logged out) ============ */
+  .landing-hero {
+    background: var(--off-white);
+    padding: 80px 40px 60px;
+    text-align: center;
+  }
+  .landing-hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 5vw, 58px);
+    font-weight: 700; line-height: 1.12;
+    color: var(--black); max-width: 640px; margin: 0 auto 20px;
+  }
+  .landing-hero p {
+    font-size: 17px; color: var(--gray-500); max-width: 480px;
+    margin: 0 auto 32px; line-height: 1.65;
+  }
+  .hero-featured {
+    max-width: 900px; margin: 0 auto;
+    background: var(--white); border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .hero-img {
+    background: var(--gray-200); min-height: 280px;
+    display: flex; align-items: center; justify-content: center; color: var(--gray-400);
+    font-size: 13px;
+  }
+  .hero-content { padding: 36px; text-align: left; display: flex; flex-direction: column; justify-content: center; }
+  .tag-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tag {
+    padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .tag-featured { background: var(--black); color: var(--white); }
+  .tag-culture { background: var(--teal-light); color: var(--teal-dark); }
+  .tag-management { background: #fef3e2; color: #b45309; }
+  .tag-tip { background: #f0f4ff; color: #3b5bdb; }
+  .hero-content h2 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 12px; font-weight: 600; }
+  .hero-content p { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; line-height: 1.65; }
+  .hero-meta { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--gray-400); margin-bottom: 20px; }
+  .stars { color: #f59e0b; }
+
+  .section { padding: 60px 40px; max-width: 1100px; margin: 0 auto; }
+  .section-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; }
+  .section-sub { font-size: 13px; color: var(--gray-400); margin-bottom: 24px; }
+  .see-all { font-size: 13px; color: var(--teal); text-decoration: none; font-weight: 500; cursor: pointer; }
+  .see-all:hover { text-decoration: underline; }
+
+  .cards-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative; }
+  .card {
+    background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg);
+    overflow: hidden; cursor: pointer; transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.1); transform: translateY(-2px); }
+  .card-img {
+    background: var(--gray-200); aspect-ratio: 16/9;
+    display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 12px;
+    position: relative;
+  }
+  .card-locked .card-img::after {
+    content: '🔒'; position: absolute; top: 8px; right: 8px; font-size: 16px;
+  }
+  .card-body { padding: 16px; }
+  .card-tag { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); margin-bottom: 6px; }
+  .card-title { font-size: 14px; font-weight: 600; line-height: 1.4; margin-bottom: 10px; color: var(--black); }
+  .card-meta { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--gray-400); }
+  .card-meta .stars { font-size: 11px; }
+  .scroll-btn {
+    position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+    width: 32px; height: 32px; border-radius: 50%; background: var(--white);
+    border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.12); font-size: 12px;
+    z-index: 10;
+  }
+
+  .testimonials { background: var(--off-white); padding: 60px 40px; }
+  .testimonials-inner { max-width: 1100px; margin: 0 auto; }
+  .testimonials h2 { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 700; text-align: center; margin-bottom: 40px; }
+  .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .testimonial-card {
+    background: var(--white); border-radius: var(--radius-lg); padding: 28px;
+    border: 1px solid var(--gray-200);
+  }
+  .testimonial-card p { font-size: 14px; color: var(--gray-700); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+  .testimonial-author { font-size: 13px; font-weight: 600; color: var(--black); }
+  .testimonial-school { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  .why-lwl { padding: 60px 40px; max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .why-lwl h2 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; margin-bottom: 16px; }
+  .why-lwl p { font-size: 15px; color: var(--gray-500); line-height: 1.75; }
+  .why-img { background: var(--gray-200); border-radius: var(--radius-lg); aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 13px; }
+
+  .topics { padding: 0 40px 60px; max-width: 1100px; margin: 0 auto; }
+  .topics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .topic-item {
+    display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+    background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .topic-item:hover { border-color: var(--teal); background: var(--teal-light); }
+  .topic-icon { width: 36px; height: 36px; background: var(--gray-100); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .topic-name { font-size: 14px; font-weight: 500; }
+  .topic-desc { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  /* ============ SCREEN 2: DASHBOARD (logged in) ============ */
+  .featured-banner {
+    border: 1px solid var(--gray-200); border-radius: var(--radius-lg);
+    display: grid; grid-template-columns: 1fr 1fr; overflow: hidden;
+    margin-bottom: 48px; background: var(--white);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .banner-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-400); margin-bottom: 16px; }
+
+  .moments-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  .moment-card {
+    background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg);
+    padding: 18px 16px; cursor: pointer; transition: all 0.2s;
+    text-align: center;
+  }
+  .moment-card:hover { border-color: var(--teal); box-shadow: 0 4px 16px rgba(43,181,160,0.12); }
+  .moment-icon { width: 48px; height: 48px; background: var(--gray-100); border-radius: 10px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .moment-count { font-size: 11px; color: var(--gray-400); font-weight: 500; margin-bottom: 6px; }
+  .moment-name { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .moment-desc { font-size: 12px; color: var(--gray-400); line-height: 1.5; }
+
+  .newsletter-banner {
+    background: var(--navy); color: var(--white);
+    border-radius: var(--radius-lg); padding: 40px;
+    text-align: center; margin: 48px 0;
+  }
+  .newsletter-banner h3 { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 8px; }
+  .newsletter-banner p { font-size: 14px; color: rgba(255,255,255,0.65); margin-bottom: 24px; }
+  .newsletter-form { display: flex; gap: 10px; max-width: 420px; margin: 0 auto; }
+  .newsletter-form input {
+    flex: 1; padding: 12px 16px; border: none; border-radius: 6px;
+    font-size: 14px; outline: none; font-family: inherit;
+  }
+
+  /* ============ SCREEN 3: SEARCH ============ */
+  .search-layout { display: grid; grid-template-columns: 260px 1fr; gap: 32px; padding: 40px; max-width: 1100px; margin: 0 auto; }
+  .filters-panel { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 24px; height: fit-content; }
+  .filters-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .filters-title { font-size: 16px; font-weight: 600; }
+  .clear-all { font-size: 13px; color: var(--teal); cursor: pointer; }
+  .filter-group { margin-bottom: 24px; }
+  .filter-group-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .filter-group-title { font-size: 14px; font-weight: 600; }
+  .clear-group { font-size: 12px; color: var(--teal); cursor: pointer; }
+  .filter-option { display: flex; align-items: center; gap: 10px; padding: 7px 0; cursor: pointer; }
+  .filter-option input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--teal); cursor: pointer; }
+  .filter-option label { font-size: 13px; color: var(--gray-700); cursor: pointer; }
+
+  .search-results-area h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; margin-bottom: 24px; }
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .pagination { display: flex; align-items: center; gap: 6px; margin-top: 40px; justify-content: center; }
+  .page-btn {
+    width: 34px; height: 34px; border-radius: 6px; border: 1px solid var(--gray-200);
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+    cursor: pointer; background: var(--white); transition: all 0.2s;
+  }
+  .page-btn.active { background: var(--black); color: var(--white); border-color: var(--black); }
+  .page-btn:hover:not(.active) { border-color: var(--black); }
+  .page-dots { font-size: 13px; color: var(--gray-400); padding: 0 4px; }
+  .page-next { padding: 0 14px; width: auto; font-size: 13px; color: var(--gray-700); }
+
+  /* ============ SCREEN 4: RESOURCE DETAIL ============ */
+  .detail-back { padding: 20px 40px 0; max-width: 1000px; margin: 0 auto; }
+  .back-link { font-size: 13px; color: var(--gray-500); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .back-link:hover { color: var(--black); }
+  .detail-layout { display: grid; grid-template-columns: 1fr 300px; gap: 40px; padding: 24px 40px 60px; max-width: 1000px; margin: 0 auto; }
+  .detail-main h1 { font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 700; line-height: 1.15; margin-bottom: 14px; }
+  .detail-byline { font-size: 14px; color: var(--gray-400); margin-bottom: 28px; display: flex; align-items: center; gap: 12px; }
+  .detail-byline a { color: var(--teal); cursor: pointer; }
+  .detail-img { background: var(--gray-200); border-radius: var(--radius-lg); aspect-ratio: 16/9; margin-bottom: 28px; display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 13px; }
+  .detail-text p { font-size: 15px; color: var(--gray-700); line-height: 1.8; margin-bottom: 20px; }
+
+  .detail-sidebar { }
+  .action-card {
+    background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg);
+    padding: 22px; position: sticky; top: 78px;
+  }
+  .rating-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .rating-row .stars { font-size: 16px; }
+  .rating-count { font-size: 13px; color: var(--gray-400); }
+  .action-time { font-size: 13px; color: var(--gray-500); margin-bottom: 16px; }
+  .action-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .action-btns .btn { width: 100%; text-align: center; padding: 12px; font-size: 14px; }
+  .action-btns-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .resource-details-card {
+    background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg);
+    padding: 20px; margin-top: 16px;
+  }
+  .resource-details-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+  .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .label { color: var(--gray-400); display: flex; align-items: center; gap: 6px; }
+  .detail-row .value { color: var(--black); font-weight: 500; }
+
+  .signup-gate {
+    background: var(--white); border: 1.5px solid var(--gray-200); border-radius: var(--radius-lg);
+    padding: 36px; max-width: 420px; margin: 48px auto; text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  }
+  .signup-gate h3 { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 8px; }
+  .signup-gate p { font-size: 14px; color: var(--gray-500); margin-bottom: 24px; line-height: 1.6; }
+  .signup-input-row { text-align: left; margin-bottom: 12px; }
+  .signup-input-row label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 6px; }
+  .signup-input-row input {
+    width: 100%; padding: 11px 14px; border: 1.5px solid var(--gray-200); border-radius: 6px;
+    font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s;
+  }
+  .signup-input-row input:focus { border-color: var(--teal); }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--gray-400); font-size: 13px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+  .social-btn {
+    width: 100%; padding: 11px; border: 1.5px solid var(--gray-200); border-radius: 6px;
+    font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer; background: var(--white); margin-bottom: 10px;
+    transition: border-color 0.2s; font-family: inherit;
+  }
+  .social-btn:hover { border-color: var(--gray-400); }
+  .sso-link { font-size: 13px; color: var(--teal); cursor: pointer; display: block; margin-top: 14px; }
+  .sso-link:hover { text-decoration: underline; }
+  .terms { font-size: 11px; color: var(--gray-400); margin-top: 16px; line-height: 1.6; }
+  .terms a { color: var(--gray-500); }
+
+  /* FOOTER */
+  footer {
+    background: var(--black); color: var(--white);
+    padding: 40px; text-align: center;
+    font-size: 13px; color: rgba(255,255,255,0.4);
+  }
+
+  /* UTILS */
+  .divider-line { height: 1px; background: var(--gray-200); margin: 0 40px; }
+  .hidden { display: none !important; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: var(--black); color: var(--white);
+    padding: 14px 20px; border-radius: 8px; font-size: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Animations */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .screen.active > * { animation: fadeIn 0.3s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ==================== SCREEN 1: LANDING ==================== -->
+<div class="screen active" id="screen-landing">
+  <nav>
+    <a class="nav-brand" href="#">
+      <span class="logo">alpaca</span>
+      <span class="sub">little wins Library</span>
+    </a>
+    <div class="nav-links">
+      <span class="nav-link" onclick="goTo('screen-landing')">What to Use</span>
+      <span class="nav-link" onclick="goTo('screen-search')">Resources</span>
+      <span class="nav-link">Situations</span>
+      <span class="nav-link">Collections</span>
+      <span class="nav-link">About</span>
+    </div>
+    <div class="nav-search" onclick="focusSearch(this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search Resources" onkeydown="handleSearchKey(event, this)">
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-ghost" onclick="showLogin()">Log In</button>
+      <button class="btn btn-primary" onclick="showSignup()">Create free account</button>
+    </div>
+  </nav>
+
+  <div class="landing-hero">
+    <h1>Free top-notch resources to strengthen school culture.</h1>
+    <p>Manage your staff with confidence and build a more aligned team with our collection of resources built specifically for school leaders.</p>
+    <button class="btn btn-primary" style="padding:14px 32px;font-size:16px;" onclick="goTo('screen-search')">View all Resources</button>
+
+    <div style="max-width:900px;margin:40px auto 0;">
+      <div class="hero-featured">
+        <div class="hero-img">[ Featured Image ]</div>
+        <div class="hero-content">
+          <div class="tag-row">
+            <span class="tag tag-featured">Featured</span>
+            <span class="tag tag-culture">Culture Tip</span>
+          </div>
+          <h2>Spring Reset: Re-energizing Your Team After Break</h2>
+          <p>Returning from spring break can feel like a mini "back-to-school" moment. This week's edition includes a culture-building activity to reconnect your staff.</p>
+          <div class="hero-meta">
+            <span>⏱ 3 min read</span>
+            <span><span class="stars">★★★★★</span> 4.9 (151)</span>
+          </div>
+          <button class="btn btn-primary" onclick="goTo('screen-detail')">Read This Week's Star Resource</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Most Popular This Month</h2>
+      <a class="see-all" onclick="goTo('screen-search')">See all →</a>
+    </div>
+    <p class="section-sub">Top-rated resources from principals like you</p>
+    <div class="cards-row">
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">Culture Tip</div>
+          <div class="card-title">Staff Appreciation on a Budget</div>
+          <div class="card-meta"><span>⏱ 6 min</span><span><span class="stars">★</span> 4.9</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">Icebreaker</div>
+          <div class="card-title">Two Truths and a Lie: School Edition</div>
+          <div class="card-meta"><span>⏱ 3 min</span><span><span class="stars">★</span> 4.8</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">Management</div>
+          <div class="card-title">The 5-Minute Check-In Protocol</div>
+          <div class="card-meta"><span>⏱ 6 min</span><span><span class="stars">★</span> 4.4</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">Culture Tip</div>
+          <div class="card-title">End-of-Year Gratitude Circle</div>
+          <div class="card-meta"><span>⏱ 5 min</span><span><span class="stars">★</span> 4.7</span></div>
+        </div>
+      </div>
+      <div class="scroll-btn">›</div>
+    </div>
+  </div>
+
+  <div class="testimonials">
+    <div class="testimonials-inner">
+      <h2>Trusted by school leaders<br>all over the country.</h2>
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <p>"I am just so appreciative of the newsletter we've gotten so many ideas from it."</p>
+          <div class="testimonial-author">Ann Weaver</div>
+          <div class="testimonial-school">Sacred Heart School, Pennsylvania</div>
+        </div>
+        <div class="testimonial-card">
+          <p>"The ideas and activities are amazing and have had a huge impact on our school culture!"</p>
+          <div class="testimonial-author">Shelby Piersch</div>
+          <div class="testimonial-school">West Delaware Community School District, Manchester, IA</div>
+        </div>
+        <div class="testimonial-card">
+          <p>"I think your resources are AMAZING. I love that each one is totally complete — everything you need is right there! They are so creative and fun."</p>
+          <div class="testimonial-author">Ann Weaver</div>
+          <div class="testimonial-school">Sacred Heart School, Pennsylvania</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="why-lwl">
+    <div>
+      <h2>Why the LWL?</h2>
+      <p>The Little Wins Library gives you quick, practical activities to reset your mood, boost focus, and feel more in control, anytime, anywhere. Perfect for those high-stress moments, transitions, or just when you need a little lift. Start small, see the difference.</p>
+    </div>
+    <div class="why-img">[ Illustration ]</div>
+  </div>
+
+  <div class="topics">
+    <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;">Browse by Topic</h3>
+    <div class="topics-grid">
+      <div class="topic-item" onclick="goTo('screen-search')">
+        <div class="topic-icon">👏</div>
+        <div><div class="topic-name">Staff Morale & Appreciation</div><div class="topic-desc">Help staff feel seen and valued</div></div>
+      </div>
+      <div class="topic-item" onclick="goTo('screen-search')">
+        <div class="topic-icon">💬</div>
+        <div><div class="topic-name">Team Building & Communication</div><div class="topic-desc">Build stronger relationships on your team</div></div>
+      </div>
+      <div class="topic-item" onclick="goTo('screen-search')">
+        <div class="topic-icon">📅</div>
+        <div><div class="topic-name">Meeting Icebreakers & Energizers</div><div class="topic-desc">Quick activities to start meetings right</div></div>
+      </div>
+      <div class="topic-item" onclick="goTo('screen-search')">
+        <div class="topic-icon">⏰</div>
+        <div><div class="topic-name">Time Management & Systems</div><div class="topic-desc">Resources for more productive workdays</div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>© 2026 Alpaca Education. All rights reserved.</footer>
+</div>
+
+<!-- ==================== SCREEN 2: DASHBOARD (logged in) ==================== -->
+<div class="screen" id="screen-dashboard">
+  <nav>
+    <a class="nav-brand" href="#">
+      <span class="logo">alpaca</span>
+      <span class="sub">little wins library</span>
+    </a>
+    <div class="nav-links">
+      <span class="nav-link active">Most Popular</span>
+      <span class="nav-link">Moments</span>
+      <span class="nav-link" onclick="goTo('screen-search')">Resources</span>
+      <span class="nav-link">For Your Team</span>
+    </div>
+    <div class="nav-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search resources..." onkeydown="handleSearchKey(event, this)">
+    </div>
+    <div class="nav-actions">
+      <div class="avatar">AM</div>
+      <span style="font-size:13px;color:var(--gray-500);cursor:pointer;">Amanda's Library</span>
+    </div>
+  </nav>
+
+  <div class="section">
+    <div class="banner-label">This Week's Little Win</div>
+    <div class="featured-banner">
+      <div class="hero-img" style="min-height:240px;">[ Featured Image ]</div>
+      <div class="hero-content">
+        <div class="tag-row">
+          <span class="tag tag-featured">Featured</span>
+          <span class="tag tag-culture">Culture Tip</span>
+        </div>
+        <h2>Spring Reset: Re-energizing Your Team After Break</h2>
+        <p>Returning from spring break can feel like a mini "back-to-school" moment. This week's edition includes a culture-building activity to reconnect your staff, a quick check-in protocol, and an icebreaker that celebrates the final push to summer.</p>
+        <div class="hero-meta">
+          <span>⏱ 3 min read</span>
+          <span><span class="stars">★★★★★</span> 4.9 (151)</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <button class="btn btn-primary" onclick="goTo('screen-detail')">Read This Week's Star Resource</button>
+          <button class="btn btn-outline" onclick="showToast('Saved to your library!')">□</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">Most Popular This Month</h2>
+      <a class="see-all" onclick="goTo('screen-search')">See all →</a>
+    </div>
+    <p class="section-sub">Top-rated resources from principals like you</p>
+    <div class="cards-row" style="margin-bottom:48px;">
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">#1 · Culture Tip</div>
+          <div class="card-title">Staff Appreciation on a Budget</div>
+          <div class="card-meta"><span>⏱ 6 min</span><span><span class="stars">★</span> 4.9</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">#2 · Icebreaker</div>
+          <div class="card-title">Two Truths and a Lie: School Edition</div>
+          <div class="card-meta"><span>⏱ 3 min</span><span><span class="stars">★</span> 4.8</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">#3 · Management</div>
+          <div class="card-title">The 5-Minute Check-In Protocol</div>
+          <div class="card-meta"><span>⏱ 6 min</span><span><span class="stars">★</span> 4.4</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">#4 · Culture Tip</div>
+          <div class="card-title">End-of-Year Gratitude Circle</div>
+          <div class="card-meta"><span>⏱ 5 min</span><span><span class="stars">★</span> 4.7</span></div>
+        </div>
+      </div>
+      <div class="scroll-btn">›</div>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">Browse by Moments</h2>
+    </div>
+    <div class="moments-row" style="margin-bottom:48px;">
+      <div class="moment-card" onclick="goTo('screen-search')">
+        <div class="moment-icon">📅</div>
+        <div class="moment-count">9 Resources · Collection</div>
+        <div class="moment-name">Back to School</div>
+        <div class="moment-desc">Start the year strong with team-building and culture-setting activities</div>
+      </div>
+      <div class="moment-card" onclick="goTo('screen-search')">
+        <div class="moment-icon">📅</div>
+        <div class="moment-count">7 Resources · Collection</div>
+        <div class="moment-name">Mid-Year Reset</div>
+        <div class="moment-desc">Re-energize your team and refocus on what matters most</div>
+      </div>
+      <div class="moment-card" onclick="goTo('screen-search')">
+        <div class="moment-icon">📅</div>
+        <div class="moment-count">11 Resources · Collection</div>
+        <div class="moment-name">End of Year</div>
+        <div class="moment-desc">Celebrate successes and close the year with gratitude and reflection</div>
+      </div>
+      <div class="moment-card" onclick="goTo('screen-search')">
+        <div class="moment-icon">📅</div>
+        <div class="moment-count">6 Resources · Collection</div>
+        <div class="moment-name">Testing Season</div>
+        <div class="moment-desc">Support your team through high-stress testing periods with stress-relief and morale boosters</div>
+      </div>
+      <div class="moment-card" onclick="goTo('screen-search')">
+        <div class="moment-icon">📅</div>
+        <div class="moment-count">13 Resources · Collection</div>
+        <div class="moment-name">Seasonal Celebrations</div>
+        <div class="moment-desc">Easy ways to celebrate holidays and special occasions while keeping staff appreciated</div>
+      </div>
+    </div>
+
+    <div class="newsletter-banner">
+      <h3>Never Miss a Little Win</h3>
+      <p>Get fresh resources, culture tips, and icebreakers delivered to your inbox every Thursday. Join 15,000+ school leaders finding their next little win.</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="Enter your email" style="color:#000;">
+        <button class="btn btn-teal">Subscribe Free</button>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">For Your Team</h2>
+      <a class="see-all" onclick="goTo('screen-search')">See all →</a>
+    </div>
+    <div class="cards-row" style="margin-bottom:60px;">
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">For Teachers</div>
+          <div class="card-title">Teacher Appreciation: Low-Cost Ideas</div>
+          <div class="card-meta"><span>⏱ 10 min</span><span><span class="stars">★</span> 4.8</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">For Paraeducators</div>
+          <div class="card-title">Supporting Paraeducators: Recognition & Growth</div>
+          <div class="card-meta"><span>⏱ 15 min</span><span><span class="stars">★</span> 4.9</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">For Students</div>
+          <div class="card-title">Student Voice: Quick Survey Protocol</div>
+          <div class="card-meta"><span>⏱ 20 min</span><span><span class="stars">★</span> 4.7</span></div>
+        </div>
+      </div>
+      <div class="card" onclick="goTo('screen-detail')">
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">For Families</div>
+          <div class="card-title">Family Engagement: Monthly Newsletter Template</div>
+          <div class="card-meta"><span>⏱ 30 min</span><span><span class="stars">★</span> 4.8</span></div>
+        </div>
+      </div>
+      <div class="scroll-btn">›</div>
+    </div>
+  </div>
+  <footer>© 2026 Alpaca Education. All rights reserved.</footer>
+</div>
+
+<!-- ==================== SCREEN 3: SEARCH ==================== -->
+<div class="screen" id="screen-search">
+  <nav>
+    <a class="nav-brand" href="#" onclick="goTo('screen-dashboard')">
+      <span class="logo">alpaca</span>
+      <span class="sub">little wins library</span>
+    </a>
+    <div class="nav-links">
+      <span class="nav-link active" onclick="goTo('screen-dashboard')">Most Popular</span>
+      <span class="nav-link">Moments</span>
+      <span class="nav-link">Resources</span>
+      <span class="nav-link">For Your Team</span>
+    </div>
+    <div class="nav-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search resources..." id="search-input" onkeydown="handleSearchKey(event, this)">
+    </div>
+    <div class="nav-actions">
+      <div class="avatar">AM</div>
+      <span style="font-size:13px;color:var(--gray-500);cursor:pointer;">Amanda's Library</span>
+    </div>
+  </nav>
+
+  <div class="search-layout">
+    <div class="filters-panel">
+      <div class="filters-header">
+        <span class="filters-title">Filters</span>
+        <span class="clear-all" onclick="clearAllFilters()">Clear all</span>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-header">
+          <span class="filter-group-title">Seasons</span>
+          <span class="clear-group">Clear</span>
+        </div>
+        <div class="filter-option"><input type="checkbox" id="s1"><label for="s1">Early Childhood</label></div>
+        <div class="filter-option"><input type="checkbox" id="s2"><label for="s2">Feedback</label></div>
+        <div class="filter-option"><input type="checkbox" id="s3"><label for="s3">Games</label></div>
+        <div class="filter-option"><input type="checkbox" id="s4"><label for="s4">Goal Setting</label></div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-header">
+          <span class="filter-group-title">Feelings</span>
+          <span class="clear-group">Clear</span>
+        </div>
+        <div class="filter-option"><input type="checkbox" id="f1"><label for="f1">Overwhelmed / Stressed</label></div>
+        <div class="filter-option"><input type="checkbox" id="f2"><label for="f2">Unmotivated</label></div>
+        <div class="filter-option"><input type="checkbox" id="f3"><label for="f3">Lonely / Isolated</label></div>
+        <div class="filter-option"><input type="checkbox" id="f4"><label for="f4">Anxious / Burnt Out</label></div>
+        <div class="filter-option"><input type="checkbox" id="f5"><label for="f5">Needs a Confidence Boost</label></div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-header">
+          <span class="filter-group-title">Categories</span>
+          <span class="clear-group">Clear</span>
+        </div>
+        <div class="filter-option"><input type="checkbox" id="c1"><label for="c1">Better Meetings</label></div>
+        <div class="filter-option"><input type="checkbox" id="c2"><label for="c2">Calendars</label></div>
+        <div class="filter-option"><input type="checkbox" id="c3"><label for="c3">Communications</label></div>
+        <div class="filter-option"><input type="checkbox" id="c4"><label for="c4">Connections to Families</label></div>
+        <div class="filter-option"><input type="checkbox" id="c5"><label for="c5">Early Childhood</label></div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-header">
+          <span class="filter-group-title">Goal / Outcome</span>
+          <span class="clear-group">Clear</span>
+        </div>
+        <div class="filter-option"><input type="checkbox" id="g1"><label for="g1">Early Childhood</label></div>
+        <div class="filter-option"><input type="checkbox" id="g2"><label for="g2">Feedback</label></div>
+        <div class="filter-option"><input type="checkbox" id="g3"><label for="g3">Games</label></div>
+        <div class="filter-option"><input type="checkbox" id="g4"><label for="g4">Goal Setting</label></div>
+      </div>
+    </div>
+
+    <div class="search-results-area">
+      <h1>Search Results</h1>
+      <div class="results-grid" id="results-grid">
+        <!-- Populated by JS -->
+      </div>
+      <div class="pagination">
+        <div class="page-btn active">1</div>
+        <div class="page-btn">2</div>
+        <div class="page-btn">3</div>
+        <span class="page-dots">...</span>
+        <div class="page-btn">23</div>
+        <div class="page-btn page-next">Next →</div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 Alpaca Education. All rights reserved.</footer>
+</div>
+
+<!-- ==================== SCREEN 4: RESOURCE DETAIL ==================== -->
+<div class="screen" id="screen-detail">
+  <nav>
+    <a class="nav-brand" href="#" onclick="goTo('screen-dashboard')">
+      <span class="logo">alpaca</span>
+      <span class="sub">little wins Library</span>
+    </a>
+    <div class="nav-links">
+      <span class="nav-link">What to Use</span>
+      <span class="nav-link" onclick="goTo('screen-search')">Resources</span>
+      <span class="nav-link">Situations</span>
+      <span class="nav-link">Collections</span>
+      <span class="nav-link">About</span>
+    </div>
+    <div class="nav-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search Resources" onkeydown="handleSearchKey(event, this)">
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-ghost" onclick="showLogin()">Log In</button>
+      <button class="btn btn-primary" onclick="showSignup()">Create free account</button>
+    </div>
+  </nav>
+
+  <div class="detail-back">
+    <span class="back-link" onclick="history.back() || goTo('screen-search')">← Back to Resources</span>
+  </div>
+
+  <div class="detail-layout">
+    <div class="detail-main">
+      <h1>Pass the Phone: Staff Connection Game</h1>
+      <div class="detail-byline">
+        By <a>Sarah Martinez</a>
+        <span style="color:var(--gray-300)">|</span>
+        Updated March 10, 2026
+      </div>
+      <div class="detail-img">[ Resource Image / Preview ]</div>
+      <div class="detail-text">
+        <p>Pass the Phone is a quick, lighthearted staff activity that sparks laughter while helping team members recognize the strengths and quirks that make their school community special. Inspired by the popular social media trend, this version keeps the focus on appreciation, positivity, and connection.</p>
+        <p>This activity works beautifully as a staff meeting energizer, end-of-week celebration, or team-building moment during professional development. The format is simple: staff members "pass the phone" to share quick, fun observations about their colleagues that build community and boost morale.</p>
+        <p>Whether you're looking to break the ice with a new team or strengthen bonds with veteran educators, Pass the Phone creates moments of recognition and joy that remind everyone why they love working together.</p>
+      </div>
+
+      <!-- Sign-up gate -->
+      <div class="signup-gate">
+        <h3>Create a free account, or log in.</h3>
+        <p>Get limited access to our resources and more with an Alpaca account.</p>
+        <div class="signup-input-row">
+          <label>Email address</label>
+          <input type="email" placeholder="Your email">
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;" onclick="showToast('Welcome to Alpaca! 🎉'); goTo('screen-dashboard')">Continue</button>
+        <div class="divider">or</div>
+        <button class="social-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Continue with Google
+        </button>
+        <button class="social-btn" style="background:var(--black);color:var(--white);border-color:var(--black);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Continue with Apple
+        </button>
+        <a class="sso-link">Continue with work or school single sign-on →</a>
+        <div class="terms">By continuing, you agree to the <a href="#">Terms of Service</a>, <a href="#">Terms of Use</a>, and <a href="#">Privacy Policy</a>.</div>
+      </div>
+    </div>
+
+    <div class="detail-sidebar">
+      <div class="action-card">
+        <div class="rating-row">
+          <span>15 minutes</span>
+          <span><span class="stars">★★★★★</span> <span class="rating-count">(1248)</span></span>
+        </div>
+        <div class="action-btns">
+          <button class="btn btn-primary" onclick="showToast('Saved to your library!')">
+            <span style="margin-right:6px;">□</span> Save
+          </button>
+          <div class="action-btns-row">
+            <button class="btn btn-outline" onclick="showToast('Share link copied!')">↗ Share</button>
+            <button class="btn btn-outline" onclick="showToast('Downloading...')">⬇ Download</button>
+          </div>
+          <button class="btn btn-outline" onclick="showToast('Preparing print view...')">🖨 Print</button>
+        </div>
+      </div>
+
+      <div class="resource-details-card">
+        <h4>Resource Details</h4>
+        <div class="detail-row"><span class="label">🎯 Effort Level</span><span class="value">Low Lift</span></div>
+        <div class="detail-row"><span class="label">👥 Best For</span><span class="value">All Staff</span></div>
+        <div class="detail-row"><span class="label">🏫 School Level</span><span class="value">Any</span></div>
+        <div class="detail-row"><span class="label">💙 Situation</span><span class="value">Staff Morale</span></div>
+        <div class="detail-row"><span class="label">📅 Time of Year</span><span class="value">Year-Round</span></div>
+      </div>
+    </div>
+  </div>
+  <footer>© 2026 Alpaca Education. All rights reserved.</footer>
+</div>
+
+<script>
+  // Screen navigation
+  function goTo(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    window.scrollTo(0, 0);
+    if (screenId === 'screen-search') populateResults();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function showLogin() {
+    showToast('Redirecting to login…');
+    setTimeout(() => goTo('screen-dashboard'), 800);
+  }
+
+  function showSignup() {
+    goTo('screen-detail');
+    setTimeout(() => {
+      const gate = document.querySelector('.signup-gate');
+      if (gate) gate.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
+  }
+
+  function handleSearchKey(e, input) {
+    if (e.key === 'Enter' && input.value.trim()) {
+      goTo('screen-search');
+      document.getElementById('search-input').value = input.value;
+    }
+  }
+
+  function clearAllFilters() {
+    document.querySelectorAll('.filters-panel input[type="checkbox"]').forEach(cb => cb.checked = false);
+    showToast('Filters cleared');
+  }
+
+  // Populate search results
+  const sampleResources = [
+    { tag: 'Culture Tip', title: 'Staff Appreciation on a Budget', time: '6 min', rating: '4.9' },
+    { tag: 'Icebreaker', title: 'Two Truths and a Lie: School Edition', time: '3 min', rating: '4.8' },
+    { tag: 'Management', title: 'The 5-Minute Check-In Protocol', time: '6 min', rating: '4.4' },
+    { tag: 'Culture Tip', title: 'End-of-Year Gratitude Circle', time: '5 min', rating: '4.7' },
+    { tag: 'Team Building', title: 'Pass the Phone: Staff Connection Game', time: '15 min', rating: '4.9' },
+    { tag: 'Icebreaker', title: 'Two Minute Tour: Share Your Space', time: '8 min', rating: '4.6' },
+    { tag: 'Management', title: 'The Compliment Chain Activity', time: '10 min', rating: '4.8' },
+    { tag: 'Culture Tip', title: 'Hidden Talents Staff Bulletin Board', time: '20 min', rating: '4.5' },
+    { tag: 'Icebreaker', title: 'Photo Challenge: Behind the Scenes', time: '5 min', rating: '4.7' },
+  ];
+
+  function populateResults() {
+    const grid = document.getElementById('results-grid');
+    if (!grid || grid.children.length > 0) return;
+    sampleResources.forEach(r => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.onclick = () => goTo('screen-detail');
+      card.innerHTML = `
+        <div class="card-img">[ Image ]</div>
+        <div class="card-body">
+          <div class="card-tag">${r.tag}</div>
+          <div class="card-title">${r.title}</div>
+          <div class="card-meta"><span>⏱ ${r.time}</span><span><span class="stars">★</span> ${r.rating}</span></div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+</script>
+</body>
+</html>
